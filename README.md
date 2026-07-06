@@ -1,51 +1,86 @@
 # Impact Data Hub
 
-Impact Data Hub is a nonprofit dashboard built for small and mid-sized organizations to track donors, members, and engagement in one centralized system.
+Impact Data Hub is a full-stack nonprofit management platform that gives small and mid-sized organizations a single place to track donors, funding, and programs — with a web dashboard and companion mobile app backed by a shared API.
 
 ## Overview
 
-Nonprofit teams often manage important relationship data across spreadsheets, emails, and disconnected tools. Impact Data Hub is designed to bring that information together in a single, streamlined dashboard so organizations can better understand their supporters and improve outreach.
-
-## Key Goals
-
-- Track donor and member information in one place
-- Improve visibility into contact and relationship history
-- Support nonprofit operations with a cleaner workflow
-- Help organizations manage outreach more effectively
-- Reduce reliance on scattered spreadsheets and manual processes
+Nonprofit teams often manage donor relationships, grant funding, and program outcomes across disconnected spreadsheets and tools. Impact Data Hub consolidates that data into one system with a REST API, a React web dashboard, and a React Native mobile app, so staff and board members can track impact from any device.
 
 ## Features
 
-Depending on implementation, the platform may include:
+- **Authentication** — JWT-based sessions (cookie or bearer token) with rate-limited login endpoints
+- **Donor management** — create, update, and search donor records and contact history
+- **Program tracking** — manage programs and view outcome metrics
+- **Funding records** — log and report on grants and funding sources
+- **Organization profiles** — maintain core organization information
+- **Dashboard analytics** — KPI cards, donor trend charts, funding overview, and operational-efficiency views (built with Recharts)
+- **CSV import/export** — bulk data workflows via PapaParse / react-csv
+- **Mobile app** — Expo/React Native client sharing the same typed API client as the web dashboard
 
-- Donor and member profiles
-- Contact and interaction tracking
-- Searchable constituent records
-- Dashboard summaries and reporting
-- Organization-focused data management
-- Administrative tools for maintaining records
+## Architecture
 
-## Why It Matters
+This is a pnpm-workspace monorepo:
 
-Small and mid-sized nonprofits need tools that are simple, affordable, and easy to maintain. Impact Data Hub is built around that need by focusing on usability, clarity, and mission-driven operations.
+| Package | Description |
+|---|---|
+| `artifacts/api-server` | Express 5 REST API — auth, donors, programs, funding, org, and dashboard routes |
+| `artifacts/dashboard` | React + Vite web dashboard (Tailwind CSS, Radix UI, Recharts) |
+| `artifacts/mobile` | Expo/React Native mobile app |
+| `lib/db` | Drizzle ORM schema and database access (PostgreSQL) |
+| `lib/api-spec` | OpenAPI spec, source of truth for the API contract |
+| `lib/api-client-react` | Typed API client/hooks generated from the OpenAPI spec via Orval |
+| `lib/api-zod` | Shared Zod validation schemas |
+
+Request validation is enforced end-to-end with Zod (`zod/v4` + `drizzle-zod`), and API types are code-generated from the OpenAPI spec so the web and mobile clients stay in sync with the server.
 
 ## Tech Stack
 
-- pnpm workspaces
-- Node.js 24
-- TypeScript 5.9
-- Express 5
-- PostgreSQL
-- Drizzle ORM
-- Zod (`zod/v4`)
-- `drizzle-zod`
-- Orval (OpenAPI code generation)
-- esbuild (CJS bundle)
+- **Monorepo:** pnpm workspaces, Node.js 24, TypeScript 5.9
+- **API:** Express 5, JWT auth, `express-rate-limit`, Pino logging
+- **Database:** PostgreSQL, Drizzle ORM
+- **Web:** React, Vite, Tailwind CSS, Radix UI, Recharts, TanStack Query
+- **Mobile:** Expo, React Native, Expo Router
+- **Validation & contracts:** Zod, `drizzle-zod`, OpenAPI + Orval codegen
+- **Build:** esbuild (API bundle), Vite (web), Expo CLI (mobile)
+
+## Getting Started
+
+**Prerequisites:** Node.js 24, pnpm, and a PostgreSQL database.
+
+```bash
+# Install dependencies
+pnpm install
+
+# Set the database connection string
+export DATABASE_URL="postgres://user:password@host:5432/dbname"
+
+# Push the database schema (dev only)
+pnpm --filter @workspace/db run push
+
+# Run the API server (http://localhost:5000)
+pnpm --filter @workspace/api-server run dev
+
+# Run the web dashboard
+pnpm --filter @workspace/dashboard run dev
+```
+
+If the API contract changes, regenerate the typed client and schemas before testing the frontend:
+
+```bash
+pnpm --filter @workspace/api-spec run codegen
+```
+
+Useful workspace-wide scripts:
+
+```bash
+pnpm run typecheck   # typecheck all packages
+pnpm run build        # typecheck + build all packages
+```
 
 ## Project Status
 
-This repository appears to be an active work-in-progress or early-stage product foundation.
+Impact Data Hub is an active work in progress. The API, web dashboard, and mobile app are functional for core donor, program, and funding workflows; additional features and polish are ongoing.
 
 ## License
 
-Licensed under the GNU General Public License v3.0.
+Licensed under the GNU General Public License v3.0. See [LICENSE](LICENSE) for details.
