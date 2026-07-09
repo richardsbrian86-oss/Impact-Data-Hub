@@ -1,0 +1,1092 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Non-Profit Impact Platform API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: donors
+    description: Donor management
+  - name: programs
+    description: Program management
+  - name: funding
+    description: Funding entries
+  - name: org
+    description: Organization profile
+  - name: dashboard
+    description: Dashboard aggregate/summary endpoints
+  - name: auth
+    description: Authentication
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      security: []
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # ── Org Profile ────────────────────────────────────────────────
+  /org:
+    get:
+      operationId: getOrgProfile
+      tags: [org]
+      summary: Get organization profile
+      responses:
+        "200":
+          description: Organization profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrgProfile"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updateOrgProfile
+      tags: [org]
+      summary: Update organization profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrgProfileInput"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrgProfile"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ── Donors ─────────────────────────────────────────────────────
+  /donors:
+    get:
+      operationId: listDonors
+      tags: [donors]
+      summary: List all donors
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: tier
+          in: query
+          schema:
+            type: string
+            enum: [major, mid_level, grassroots]
+      responses:
+        "200":
+          description: List of donors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Donor"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: createDonor
+      tags: [donors]
+      summary: Create a new donor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DonorInput"
+      responses:
+        "201":
+          description: Created donor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Donor"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /donors/{id}:
+    get:
+      operationId: getDonor
+      tags: [donors]
+      summary: Get donor by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Donor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Donor"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updateDonor
+      tags: [donors]
+      summary: Update a donor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DonorInput"
+      responses:
+        "200":
+          description: Updated donor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Donor"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteDonor
+      tags: [donors]
+      summary: Delete a donor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ── Programs ───────────────────────────────────────────────────
+  /programs:
+    get:
+      operationId: listPrograms
+      tags: [programs]
+      summary: List all programs
+      responses:
+        "200":
+          description: List of programs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Program"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: createProgram
+      tags: [programs]
+      summary: Create a new program
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProgramInput"
+      responses:
+        "201":
+          description: Created program
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Program"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /programs/{id}:
+    get:
+      operationId: getProgram
+      tags: [programs]
+      summary: Get program by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Program
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Program"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updateProgram
+      tags: [programs]
+      summary: Update a program
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProgramInput"
+      responses:
+        "200":
+          description: Updated program
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Program"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteProgram
+      tags: [programs]
+      summary: Delete a program
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ── Funding Entries ────────────────────────────────────────────
+  /funding:
+    get:
+      operationId: listFundingEntries
+      tags: [funding]
+      summary: List all funding entries
+      parameters:
+        - name: source
+          in: query
+          schema:
+            type: string
+            enum: [grants, individual, events, corporate]
+        - name: year
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of funding entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FundingEntry"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: createFundingEntry
+      tags: [funding]
+      summary: Create a new funding entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FundingEntryInput"
+      responses:
+        "201":
+          description: Created funding entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FundingEntry"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /funding/{id}:
+    get:
+      operationId: getFundingEntry
+      tags: [funding]
+      summary: Get funding entry by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Funding entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FundingEntry"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      operationId: updateFundingEntry
+      tags: [funding]
+      summary: Update a funding entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FundingEntryInput"
+      responses:
+        "200":
+          description: Updated funding entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FundingEntry"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteFundingEntry
+      tags: [funding]
+      summary: Delete a funding entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ── Dashboard Aggregates ───────────────────────────────────────
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Top-level KPI summary
+      responses:
+        "200":
+          description: Dashboard KPI summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /dashboard/funding-trend:
+    get:
+      operationId: getFundingTrend
+      tags: [dashboard]
+      summary: Monthly funding trend by source (last 24 months)
+      responses:
+        "200":
+          description: Funding trend data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FundingTrendPoint"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /dashboard/donor-trends:
+    get:
+      operationId: getDonorTrends
+      tags: [dashboard]
+      summary: Donor trends over time and tier breakdown
+      responses:
+        "200":
+          description: Donor trend data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DonorTrendsData"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /dashboard/program-outcomes:
+    get:
+      operationId: getProgramOutcomes
+      tags: [dashboard]
+      summary: Program outcomes vs targets
+      responses:
+        "200":
+          description: Program outcomes data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProgramOutcomeSummary"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /dashboard/operational-metrics:
+    get:
+      operationId: getOperationalMetrics
+      tags: [dashboard]
+      summary: Operational efficiency metrics
+      responses:
+        "200":
+          description: Operational metrics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OperationalMetrics"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ── Auth ───────────────────────────────────────────────────────
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Authenticate and receive a session token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Clear the current session
+      security: []
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogoutResult"
+
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: Get the authenticated user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+security:
+  - bearerAuth: []
+  - cookieAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: token
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required: [status]
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        fields:
+          type: object
+          additionalProperties:
+            type: string
+      required: [error]
+
+    # ── Auth ───────────────────────────────────────────────────────
+    LoginInput:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required: [email, password]
+
+    AuthUser:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        name:
+          type: string
+          nullable: true
+        role:
+          type: string
+      required: [id, email, role]
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/AuthUser"
+      required: [token, user]
+
+    LogoutResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+      required: [success]
+
+    # ── Org ───────────────────────────────────────────────────────
+    OrgProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        mission:
+          type: string
+        founded:
+          type: integer
+        city:
+          type: string
+        state:
+          type: string
+        website:
+          type: string
+        annualBudget:
+          type: number
+        fiscalYearStart:
+          type: string
+        programPct:
+          type: number
+        adminPct:
+          type: number
+        fundraisingPct:
+          type: number
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required: [id, name, mission, founded, city, state, annualBudget, fiscalYearStart, programPct, adminPct, fundraisingPct]
+
+    OrgProfileInput:
+      type: object
+      properties:
+        name:
+          type: string
+        mission:
+          type: string
+        founded:
+          type: integer
+        city:
+          type: string
+        state:
+          type: string
+        website:
+          type: string
+        annualBudget:
+          type: number
+        fiscalYearStart:
+          type: string
+        programPct:
+          type: number
+        adminPct:
+          type: number
+        fundraisingPct:
+          type: number
+      required: [name, mission, founded, city, state, annualBudget, fiscalYearStart, programPct, adminPct, fundraisingPct]
+
+    # ── Donor ─────────────────────────────────────────────────────
+    Donor:
+      type: object
+      properties:
+        id:
+          type: integer
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        tier:
+          type: string
+          enum: [major, mid_level, grassroots]
+        totalGiven:
+          type: number
+        lastGiftAmount:
+          type: number
+        lastGiftDate:
+          type: string
+        firstGiftDate:
+          type: string
+        isRecurring:
+          type: boolean
+        notes:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required: [id, firstName, lastName, email, tier, totalGiven, isRecurring]
+
+    DonorInput:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        tier:
+          type: string
+          enum: [major, mid_level, grassroots]
+        totalGiven:
+          type: number
+        lastGiftAmount:
+          type: number
+        lastGiftDate:
+          type: string
+        firstGiftDate:
+          type: string
+        isRecurring:
+          type: boolean
+        notes:
+          type: string
+      required: [firstName, lastName, email, tier, totalGiven, isRecurring]
+
+    # ── Program ───────────────────────────────────────────────────
+    Program:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        status:
+          type: string
+          enum: [active, paused, completed]
+        annualBudget:
+          type: number
+        peopleServedTarget:
+          type: integer
+        peopleServedActual:
+          type: integer
+        outcomesTarget:
+          type: integer
+        outcomesActual:
+          type: integer
+        costPerOutcome:
+          type: number
+        startDate:
+          type: string
+        endDate:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required: [id, name, description, category, status, annualBudget, peopleServedTarget, peopleServedActual, outcomesTarget, outcomesActual]
+
+    ProgramInput:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        status:
+          type: string
+          enum: [active, paused, completed]
+        annualBudget:
+          type: number
+        peopleServedTarget:
+          type: integer
+        peopleServedActual:
+          type: integer
+        outcomesTarget:
+          type: integer
+        outcomesActual:
+          type: integer
+        costPerOutcome:
+          type: number
+        startDate:
+          type: string
+        endDate:
+          type: string
+      required: [name, description, category, status, annualBudget, peopleServedTarget, peopleServedActual, outcomesTarget, outcomesActual]
+
+    # ── Funding Entry ─────────────────────────────────────────────
+    FundingEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+        source:
+          type: string
+          enum: [grants, individual, events, corporate]
+        donor:
+          type: string
+        amount:
+          type: number
+        date:
+          type: string
+        notes:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required: [id, source, amount, date]
+
+    FundingEntryInput:
+      type: object
+      properties:
+        source:
+          type: string
+          enum: [grants, individual, events, corporate]
+        donor:
+          type: string
+        amount:
+          type: number
+        date:
+          type: string
+        notes:
+          type: string
+      required: [source, amount, date]
+
+    # ── Dashboard Aggregates ──────────────────────────────────────
+    DashboardSummary:
+      type: object
+      properties:
+        totalFundingYTD:
+          type: number
+        totalFundingYTDChange:
+          type: number
+        totalDonors:
+          type: integer
+        totalDonorsChange:
+          type: number
+        activeProgramsCount:
+          type: integer
+        totalPeopleServed:
+          type: integer
+        totalPeopleServedChange:
+          type: number
+          nullable: true
+        programExpenseRatio:
+          type: number
+        programExpenseRatioChange:
+          type: number
+          nullable: true
+        donorRetentionRate:
+          type: number
+        averageGiftSize:
+          type: number
+      required: [totalFundingYTD, totalFundingYTDChange, totalDonors, totalDonorsChange, activeProgramsCount, totalPeopleServed, totalPeopleServedChange, programExpenseRatio, donorRetentionRate, averageGiftSize]
+
+    FundingTrendPoint:
+      type: object
+      properties:
+        month:
+          type: string
+        grants:
+          type: number
+        individual:
+          type: number
+        events:
+          type: number
+        corporate:
+          type: number
+        total:
+          type: number
+      required: [month, grants, individual, events, corporate, total]
+
+    DonorTrendsData:
+      type: object
+      properties:
+        monthly:
+          type: array
+          items:
+            type: object
+            properties:
+              month:
+                type: string
+              newDonors:
+                type: integer
+              retainedDonors:
+                type: integer
+              lapsedDonors:
+                type: integer
+              total:
+                type: integer
+            required: [month, newDonors, retainedDonors, lapsedDonors, total]
+        tierBreakdown:
+          type: array
+          items:
+            type: object
+            properties:
+              tier:
+                type: string
+              count:
+                type: integer
+              totalGiven:
+                type: number
+              percentage:
+                type: number
+            required: [tier, count, totalGiven, percentage]
+        retentionRate:
+          type: number
+        averageGiftSize:
+          type: number
+      required: [monthly, tierBreakdown, retentionRate, averageGiftSize]
+
+    ProgramOutcomeSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        category:
+          type: string
+        status:
+          type: string
+        peopleServedTarget:
+          type: integer
+        peopleServedActual:
+          type: integer
+        peopleServedPct:
+          type: number
+        outcomesTarget:
+          type: integer
+        outcomesActual:
+          type: integer
+        outcomesPct:
+          type: number
+        annualBudget:
+          type: number
+        costPerOutcome:
+          type: number
+      required: [id, name, category, status, peopleServedTarget, peopleServedActual, peopleServedPct, outcomesTarget, outcomesActual, outcomesPct, annualBudget]
+
+    OperationalMetrics:
+      type: object
+      properties:
+        programExpenseRatio:
+          type: number
+        adminExpenseRatio:
+          type: number
+        fundraisingExpenseRatio:
+          type: number
+        totalBudget:
+          type: number
+        programSpend:
+          type: number
+        adminSpend:
+          type: number
+        fundraisingSpend:
+          type: number
+        costTrend:
+          type: array
+          items:
+            type: object
+            properties:
+              year:
+                type: string
+              programCosts:
+                type: number
+              adminCosts:
+                type: number
+              fundraisingCosts:
+                type: number
+            required: [year, programCosts, adminCosts, fundraisingCosts]
+      required: [programExpenseRatio, adminExpenseRatio, fundraisingExpenseRatio, totalBudget, programSpend, adminSpend, fundraisingSpend, costTrend]
