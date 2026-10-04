@@ -1,10 +1,10 @@
 # Impact Data Hub
 
-Impact Data Hub is a full-stack nonprofit management platform that gives small and mid-sized organizations a single place to track donors, funding, and programs — with a web dashboard and companion mobile app backed by a shared API.
+Impact Data Hub is a full-stack nonprofit management platform that gives small and mid-sized organizations a single place to track donors, funding, and programs — with a web dashboard and companion mobile app.
 
 ## Overview
 
-Nonprofit teams often manage donor relationships, grant funding, and program outcomes across disconnected spreadsheets and tools. Impact Data Hub consolidates that data into one system with a REST API, a React web dashboard, and a React Native mobile app, so staff and board members can track impact from any device.
+Nonprofit teams often manage donor relationships, grant funding, and program outcomes across disconnected spreadsheets and tools. Impact Data Hub consolidates that data into one system with a REST API, a React dashboard, and a mobile client.
 
 ## Features
 
